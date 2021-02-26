@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <!--设置不缓存-->
+
+    <title>爱生活，爱旅游</title>
+    <link href="./css/result/style.css" rel="stylesheet" />
+    <link href="./css/result/header.css" rel="stylesheet" />
+</head>
+
+<body>
+  
+     <div class="header unselect">
+        <div class="header-content">
+            <p class="fl">
+                <img img src="./img/logo.png" maxwidth="5" alt="logo" />
+            </p>
+            <div class="header-menu fr">
+              
+                
+                <div class="box menu-box fr">
+                    <ul style="list-style:none;">
+
+                        <li><a onclick="clicked(2)">景点信息检索</a></li>
+                        <li><a onclick="clicked(3)">旅游资讯</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="contenter">
+        <div class="contenter-content">
+            <div class="detail-head unselect">
+                <p class="active" id="iteminfor">景点信息</p>
+                <p class="fmxx" id="flztbtn">天气预报</p>
+            </div>
+            <div class="detail-content">
+                <!--此处根据选择标签显示对应元素块-->
+                <!--著录项目信息-->
+                <div class="itemInfo" id="itemInfoContainer">
+                </div>
+                <!--法律状态-->
+                <div class="itemLaw dnp">
+                    <table class="table table-striped" cellspacing="0" cellpadding="10">
+        
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--底部-->
+    <div class="footer-fp">
+        <div class="footer-fp-content">
+            <div class="col-xs-10">
+                <div class="leftlink fl">
+                    <p>Tongji University</p>
+                </div>
+                <div class="linkline fl">
+                    <p>|</p>
+                </div>
+                <div class="rightlink fl">
+                    <p>college of software engineering</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./js/result/jquery.min.js"></script>
+    <script src="./js/result/jsrender.min.js"></script>
+    <script src="./js/result/echarts.min.js"></script>
+    <script src="./js/result/basic.js"></script>
+    <script type="text/x-jsrender" id="Tmpl">
+        <div class="item-title">
+            {{if PATENT_TYPE==1||PATENT_TYPE==8}}
+            <label class="title-color">{{:NAME}}  [发明]</label> {{else PATENT_TYPE==3}}
+            <label class="title-color">{{:NAME}}  [外观]</label> {{else PATENT_TYPE==2||PATENT_TYPE==9}}
+            <label class="title-color">{{:NAME}}  [实用新型]</label> {{else}}
+            <label class="title-color">{{:NAME}}</label> {{/if}}
+        </div>
+        <div style="overflow: hidden;">
+            <div class="item-content fl">
+                <div>
+                    <p>申请号：</p><span>{{:APP_NUM}}</span>
+                </div>
+                <div>
+                    <p>申请日：</p>{{dateconvert:APP_DATE}}
+                </div>
+                <div>
+                    <p>国家/省市：</p><span>{{:PROVINCE.NAME}}</span>
+                </div>
+                {{if PATENT_TYPE==1||PATENT_TYPE==8}}
+                <div>
+                    <p>公开号：</p><span>{{:PUBLIC_NUM}}</span>
+                </div>
+                {{/if}}
+
+                <div>
+                    <p>分类号：</p>{{:CLASS_CODE}}
+                </div>
+                <div>
+                    <p>申请公司：</p>{{:PROPOSER_NAME}}
+                </div>
+                <div>
+                    <p>申请地址：</p><span>{{:COMPANY1.ADDRESS}}</span>
+                </div>
+                <div>
+                    <p>发明人：</p>{{:PERSON.NAME}}
+                </div>
+                <div>
+                    <p>当前权利人：</p>{{:PATENTEE_NAME}}
+                </div>
+                {{if CITE!=""&&CITE!=null}}
+                <div>
+                    <p>引用专利：</p><span>{{for CITE}}{{:CITED_APP_NUM}};{{/for}}</span>
+                </div>
+                {{/if}}{{if IS_VALID==3}}
+                <div>
+                    <p>当前状态：</p><span>审中</span>
+                </div>
+                {{else IS_VALID==1}}
+                <div>
+                    <p>当前状态：</p><span>有效</span>
+                </div>
+                {{else IS_VALID==2}}
+                <div>
+                    <p>当前状态：</p><span>失效</span>
+                </div>
+                {{/if}}
+            </div>
+        </div>
+        <div class="item-summary">
+            {{if PATENT_TYPE==3}}
+            <p>
+                <strong>简要说明:</strong>
+                <span>
+                    {{:ABSTRACT}}
+                </span>
+            </p>
+
+            {{else}}
+            <p>
+                <strong>摘要:</strong>
+                <span>
+                    {{:ABSTRACT}}
+                </span>
+            </p>
+            <p>
+                <strong>主权利要求:</strong>
+                <span>
+                    {{:MAIN_CLAIM}}
+                </span>
+            </p>
+            {{/if}}
+        </div>
+    </script>
+
+    <script id="legalTemplate" type="text/x-jsrender">
+        {{for}}
+        <tr>
+            <td><span>{{dateconvert:#data.ANNOUNCE_DATE}}</span></td>
+            <td><span>{{:#data.STATUS}}</span></td>
+            <td><span>{{:#data.MSG}}</span></td>
+            {{if #data.DETAIL==""||#data.DETAIL==null}}
+            <td><span>无</span></td>
+            {{else}}
+            <td><span>{{:#data.DETAIL}}</span></td>
+            {{/if}}
+        </tr>
+        {{/for}}
+    </script>
+    <script id="famTemplate" type="text/x-jsrender">
+        {{for}}
+        <tr>
+            <td><span>{{:#data}}</span></td>
+        </tr>
+        {{/for}}
+    </script>
+    <script>
+        $.views.converters({
+            dateconvert: function (val) {
+                return val.substring(0, val.length - 9);
+            }
+        })
+    </script>
+    <script type="text/javascript" src="./js/navigator.js"></script>
+</body>
+
+</html>
